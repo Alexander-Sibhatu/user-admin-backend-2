@@ -3,7 +3,7 @@ const morgan = require('morgan');
 const bodyParser = require('body-parser');
 
 
-const dev = require('./config');
+const dev = require('./config/index');
 
 
 const connectToMongoDB = require('./config/db');
@@ -11,7 +11,7 @@ const userRouter = require('./routes/users');
 
 const app = express();
 
-const PORT = dev.app.serverPort;
+const PORT = dev.serverPort;
 
 app.use(morgan('dev'));
 app.use(bodyParser.json())
