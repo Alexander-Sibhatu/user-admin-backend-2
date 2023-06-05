@@ -3,9 +3,10 @@ const fs = require('fs');
 
 const dev = require('../config');
 
-const { securePassword } = require("../helpers/bcryptPassword");
+const { securePassword, comparePassword } = require("../helpers/bcryptPassword");
 const User = require('../models/users');
 const { sendEmailWithNodeMailer } = require('../helpers/email');
+
 
 const registerUser = async (req, res) => {
     try {
@@ -115,19 +116,78 @@ const verifyEmail = (req, res) => {
                 message: 'user was not repeated',
             });
         }
-        res.status(200).json({
+        res.status(201).json({
+            user : user,
             message: 'user was created. Ready to sign in.'
         })
           });
           
-        res.status(200).json({
-            message: "email is verified",
-        })
     } catch (error) {
         res.status(500).json({
             message: error.message
         })
     }
+};
+
+const loginUser = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        if (!email || !password) {
+            return res.status(404).json({
+                message: 'email or password is missing',
+            });
+        }
+
+        const registeredUser = await User.findOne({email});
+        if(!registeredUser){
+            return res.status(400).json({
+                message: 'Please sign up first!',
+            });
+        }
+        if(registerUser.is_banned) {
+            return res.status(400).json({message: 'Banned user'})
+        }
+
+        const isPasswordMatch = await comparePassword(password, registeredUser.password);
+        if(!isPasswordMatch){
+            return res.status(400).json({
+                message: 'email/password does not match',
+            });
+        }
+
+        res.status(200).json({
+            user: registeredUser,
+            message: 'login successful'
+        });
+    } catch (error) {
+        res.status(500).json({
+            message: error.message, 
+        })
+    }
 }
 
-module.exports = { registerUser, verifyEmail };
+const logoutUser = (req, res) => {
+    try {
+        res.status(200).json({
+            message: 'logout successful'
+        });
+    } catch (error) {
+        res.status(500).json({
+            message: error.message, 
+        })   
+    }
+}
+
+const userProfile = (req, res) => {
+    try {
+        res.status(200).json({
+            message: ''
+        });
+    } catch (error) {
+        res.status(500).json({
+            message: error.message, 
+        })   
+    }
+}
+
+module.exports = { registerUser, verifyEmail, loginUser, logoutUser, userProfile };
