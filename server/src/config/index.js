@@ -7,5 +7,6 @@ const dev = {
         smtpPassword: process.env.SMTP_USERPASSWORD,
         clientUrl: process.env.CLIENT_URL,
         url: process.env.MONGO_URL || 'mongodb://localhost:27017/user-admin-db',
+        sessionKey: process.env.SESSION_KEY,
 }
 module.exports = dev;
