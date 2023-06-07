@@ -87,6 +87,7 @@ const verifyEmail = (req, res) => {
             
                 });
             }
+
             // decoded the data
             const { name, email, phone, hashedPassword, image  } = decoded;
             const isExist = await User.findOne({email: email})
@@ -144,19 +145,29 @@ const loginUser = async (req, res) => {
                 message: 'Please sign up first!',
             });
         }
-        if(registerUser.is_banned) {
+        if(registeredUser.is_banned) {
             return res.status(400).json({message: 'Banned user'})
         }
 
         const isPasswordMatch = await comparePassword(password, registeredUser.password);
+        
         if(!isPasswordMatch){
             return res.status(400).json({
                 message: 'email/password does not match',
             });
         }
 
+        // creating session >> browser as a cookie
+        req.session.userId = registeredUser._id;
+        
+        
         res.status(200).json({
-            user: registeredUser,
+            user: {
+                name: registerUser.name,
+                email: registerUser.email,
+                phone: registerUser.phone,
+                image: registerUser.image,
+            },
             message: 'login successful'
         });
     } catch (error) {
@@ -181,7 +192,7 @@ const logoutUser = (req, res) => {
 const userProfile = (req, res) => {
     try {
         res.status(200).json({
-            message: ''
+            message: 'user profile'
         });
     } catch (error) {
         res.status(500).json({
