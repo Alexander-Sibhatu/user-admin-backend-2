@@ -10,7 +10,7 @@ const {
     logoutUser,
     userProfile,
  } = require('../controllers/users');
-const isLoggedIn = require('../middlewares/auth');
+const {isLoggedIn, isLoggedOut} = require('../middlewares/auth');
 
  userRouter.use(
     session({
@@ -23,7 +23,7 @@ const isLoggedIn = require('../middlewares/auth');
 
 userRouter.post('/register', formidable(), registerUser)
 userRouter.post('/verify-email', verifyEmail)
-userRouter.post('/login', loginUser)
+userRouter.post('/login', isLoggedOut, loginUser)
 userRouter.get('/logout', logoutUser)
 userRouter.get('/', isLoggedIn, userProfile);
 
