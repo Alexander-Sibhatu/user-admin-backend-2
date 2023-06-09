@@ -193,10 +193,60 @@ const logoutUser = (req, res) => {
     }
 }
 
-const userProfile = (req, res) => {
+const userProfile = async (req, res) => {
     try {
+        const userData = await User.findById(req.session.userId);
         res.status(200).json({
-            message: 'user profile'
+            ok: true,
+            message: 'user profile',
+            user: userData
+        });
+    } catch (error) {
+        res.status(500).json({
+            message: error.message, 
+        })   
+    }
+}
+const deleteUser = async (req, res) => {
+    try {
+        await User.findByIdAndDelete(req.session.userId);
+        res.status(200).json({
+            ok: true,
+            message: 'user is deleted successfuly',
+        });
+    } catch (error) {
+        res.status(500).json({
+            message: error.message, 
+        })   
+    }
+}
+const updateUser = async (req, res) => {
+    try {
+        if(!req.fields.password) {
+
+        }
+        const hashedPassword = await securePassword(req.fields.password);
+        const updatedData = await User.findByIdAndUpdate(req.session.userId,
+            { ...req.fields, password: hashedPassword }, 
+            { new: true }
+        );
+
+        if(!updatedData) {
+            res.status(400).json({
+                ok: false,
+                message: 'user was not updated'
+            });
+        }
+
+        if(req.files.image) {
+            updatedData.image.data = fs.readFileSync(image.path);
+            updatedData.image.contentType = image.type;
+        }
+        await updatedData.save();
+
+        res.status(200).json({
+            ok: true,
+            message: 'user is updated successfuly',
         });
     } catch (error) {
         res.status(500).json({
@@ -205,4 +255,12 @@ const userProfile = (req, res) => {
     }
 }
 
-module.exports = { registerUser, verifyEmail, loginUser, logoutUser, userProfile };
+module.exports = { 
+    registerUser, 
+    verifyEmail, 
+    loginUser, 
+    logoutUser, 
+    userProfile,
+    deleteUser,
+    updateUser
+};
