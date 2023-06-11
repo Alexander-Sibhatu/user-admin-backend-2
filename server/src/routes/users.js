@@ -11,6 +11,8 @@ const {
     userProfile,
     deleteUser,
     updateUser,
+    forgetPassword,
+    resetPassword,
  } = require('../controllers/users');
 const {isLoggedIn, isLoggedOut} = require('../middlewares/auth');
 
@@ -27,8 +29,10 @@ userRouter.post('/register', formidable(), registerUser)
 userRouter.post('/verify-email', verifyEmail)
 userRouter.post('/login', isLoggedOut, loginUser)
 userRouter.get('/logout', isLoggedIn, logoutUser)
-userRouter.get('/', isLoggedIn, userProfile);
-userRouter.delete('/', isLoggedIn, deleteUser);
+userRouter.get('/', isLoggedIn, userProfile)
+userRouter.delete('/', isLoggedIn, deleteUser)
 userRouter.put('/', isLoggedIn, formidable(), updateUser);
+userRouter.post('/forget-password', isLoggedOut, forgetPassword);
+userRouter.post('/reset-password', isLoggedOut, resetPassword);
 
 module.exports = userRouter

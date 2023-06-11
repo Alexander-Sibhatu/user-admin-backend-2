@@ -220,6 +220,110 @@ const deleteUser = async (req, res) => {
         })   
     }
 }
+
+const forgetPassword = async (req, res) => {
+    try {
+        const {email, password} = req.body;
+
+        if(!email || !password) {
+            return res.status(404).json({
+                message: "email or password is missing"
+            })
+        }
+
+        if (password.length < 6) {
+            return res.status(404).json({
+                message: 'minimum length for password is 6'
+            })
+        }
+
+        const user = await User.findOne({email: email});
+        if(!user) return res.status(400).json({message: 'user was not found with this email address'});
+        
+        const hashedPassword = await securePassword(password);
+        //store the data
+        const token = jwt.sign(
+                { email, hashedPassword }, 
+                dev.jwtSecretKey,
+                {expiresIn: '5m'}
+            );
+
+            // prepare the email
+            const emailData = {
+             email,
+             subject: "Account Activation Email",
+             html: `
+             <h2> Hello ${user.name} . </h2>
+             <p> Please click <a href="${dev.clientUrl}/user/reset-password/${token}">here</a> Reset password </p>     
+             `, // html body
+           };
+            
+           sendEmailWithNodeMailer(emailData);
+
+
+        res.status(200).json({
+            ok: true,
+            message: 'Email has been sent. Please go to you email and reset the password',
+            token: token
+        });
+    } catch (error) {
+        res.status(500).json({
+            message: error.message, 
+        })   
+    }
+}
+
+const resetPassword = (req, res) => {
+    try {
+        const {token} = req.body;
+        if(!token) {
+            return res.status(404).json({
+                message: "token is missing"
+            })
+        }
+
+        jwt.verify(token, dev.jwtSecretKey, async function(err, decoded) {
+            if (err) {
+                return res.status(401).json({
+                    message: "Token is expired"
+            
+                });
+            }
+
+            // decoded the data
+            const { email, hashedPassword } = decoded;
+            const isExist = await User.findOne({email: email})
+        if(!isExist){
+            return res.status(404).json({
+                message: 'user with email does not exist'
+            })
+        }
+
+        // update the user
+        const updatedUser = await User.updateOne({email: email},
+            {
+                $set: {
+                    password: hashedPassword
+                }
+            });
+            if(!updatedUser) {
+                res.status(400).json({
+                    message: 'reset password was successful',
+                });
+            }
+        res.status(201).json({
+            user : updateUser,
+            message: 'password is reset successfuly'
+        })
+          });
+          
+    } catch (error) {
+        res.status(500).json({
+            message: error.message
+        })
+    }
+};
+
 const updateUser = async (req, res) => {
     try {
         if(!req.fields.password) {
@@ -255,6 +359,7 @@ const updateUser = async (req, res) => {
     }
 }
 
+
 module.exports = { 
     registerUser, 
     verifyEmail, 
@@ -262,5 +367,7 @@ module.exports = {
     logoutUser, 
     userProfile,
     deleteUser,
-    updateUser
+    updateUser,
+    forgetPassword,
+    resetPassword
 };

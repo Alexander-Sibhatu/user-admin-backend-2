@@ -9,6 +9,7 @@ const dev = require('./config/index');
 
 const connectToMongoDB = require('./config/db');
 const userRouter = require('./routes/users');
+const adminRouter = require('./routes/admin');
 
 const app = express();
 
@@ -19,6 +20,7 @@ app.use(morgan('dev'));
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use('/api/users', userRouter)
+app.use('/api/admin', adminRouter)
 
 app.get('/', (req, res) => {
     res.status(200).json({
