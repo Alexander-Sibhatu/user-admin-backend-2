@@ -38,10 +38,10 @@ const userSchema = new Schema({
         default: 0,
     },
     
-    is_verified: {
-        type: Number,
-        default: 0
-    },
+    // is_verified: {
+    //     type: Number,
+    //     default: 0
+    // },
     createdAt: {
         type: Date,
         default: Date.now,
@@ -49,6 +49,10 @@ const userSchema = new Schema({
     image: {
         data: Buffer,
         contentType: String
+    },
+    is_Banned: {
+        type: Number,
+        default: 0
     }
 })
 

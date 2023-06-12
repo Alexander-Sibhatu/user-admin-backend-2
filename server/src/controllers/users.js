@@ -145,7 +145,7 @@ const loginUser = async (req, res) => {
                 message: 'Please sign up first!',
             });
         }
-        if(registeredUser.is_banned) {
+        if(registeredUser.is_Banned) {
             return res.status(400).json({message: 'Banned user'})
         }
 
