@@ -15,6 +15,7 @@ const {
     resetPassword,
  } = require('../controllers/users');
 const {isLoggedIn, isLoggedOut} = require('../middlewares/auth');
+const upload = require('../middlewares/upload');
 
  userRouter.use(
     session({
@@ -25,7 +26,7 @@ const {isLoggedIn, isLoggedOut} = require('../middlewares/auth');
     cookie: { secure: false, maxAge: 10 * 6000 },
   }))
 
-userRouter.post('/register', formidable(), registerUser)
+userRouter.post('/register', upload.single('image'), registerUser)
 userRouter.post('/verify-email', verifyEmail)
 userRouter.post('/login', isLoggedOut, loginUser)
 userRouter.get('/logout', isLoggedIn, logoutUser)
